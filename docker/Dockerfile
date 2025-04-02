@@ -1,5 +1,8 @@
 FROM selenium/node-chrome
 
+LABEL org.opencontainers.image.title="NexChat"
+LABEL org.opencontainers.image.description="An AI chat interface inspired by Google Gemini"
+
 ARG G4F_VERSION
 ENV G4F_VERSION $G4F_VERSION
 

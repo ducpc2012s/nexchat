@@ -1,15 +1,14 @@
 version: '3'
 
 services:
-  g4f-slim:
-    container_name: g4f-slim
-    image: hlohaus789/g4f:latest-slim
+  nexchat:
+    image: nexchat:latest-slim
     build:
       context: .
       dockerfile: docker/Dockerfile-slim
-    command: python -m g4f --debug --port 8080
     volumes:
-      - .:/app
+      - ./har_and_cookies:/app/har_and_cookies
+      - ./generated_images:/app/generated_images
     ports:
-      - '8080:8080'
-      - '1337:8080'
+      - '8080:1337'
+    command: ["python", "-m", "g4f"]
