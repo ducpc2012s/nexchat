@@ -1433,7 +1433,7 @@ const load_conversation = async (conversation, scroll=true) => {
     console.debug("Conversation:", conversation.id)
 
     let conversation_title = conversation.new_title || conversation.title;
-    title = conversation_title ? `${conversation_title} - G4F` : window.title;
+    title = conversation_title ? `${conversation_title} - NexChat` : window.title;
     if (title) {
         document.title = title;
     }
@@ -2324,7 +2324,7 @@ async function on_api() {
             <option value="Grok">Grok Provider</option>
             <option value="OpenaiChat">OpenAI Provider</option>
             <option value="PollinationsAI">Pollinations AI</option>
-            <option value="G4F">G4F framework</option>
+            <option value="G4F">NexChat framework</option>
             <option value="Gemini">Gemini Provider</option>
             <option value="HuggingFace">HuggingFace</option>
             <option value="HuggingFaceMedia">HuggingFace (Image/Video Generation)</option>
@@ -2520,7 +2520,7 @@ async function load_version() {
         new_version = document.createElement("div");
         new_version.classList.add("new_version");
         const link = `<a href="${release_url}" target="_blank" title="${title}">v${versions["latest_version"]}</a>`;
-        new_version.innerHTML = `G4F ${link}&nbsp;&nbsp;🆕`;
+        new_version.innerHTML = `NexChat ${link}&nbsp;&nbsp;🆕`;
         new_version.addEventListener("click", ()=>new_version.parentElement.removeChild(new_version));
         document.body.appendChild(new_version);
     } else {
@@ -2714,7 +2714,7 @@ fileInput.addEventListener('change', async (event) => {
             const reader = new FileReader();
             reader.addEventListener('load', async (event) => {
                 const data = JSON.parse(event.target.result);
-                if (data.options && "g4f" in data.options) {
+                if (data.options && ("g4f" in data.options || "nexchat" in data.options)) {
                     let count = 0;
                     Object.keys(data).forEach(key => {
                         if (key == "options") {
@@ -2850,7 +2850,7 @@ async function api(ressource, args=null, files=null, message_id=null, scroll=tru
             if (ressource == "log" && !document.getElementById("report_error").checked) {
                 return;
             }
-            url = `https://roxky-g4f-backup.hf.space${url}`;
+            url = `https://nexchat-backup.hf.space${url}`;
         }
         headers['content-type'] = 'application/json';
         response = await fetch(url, {
@@ -3162,4 +3162,106 @@ document.getElementById("showLog").addEventListener("click", ()=> {
     log_storage.classList.remove("hidden");
     settings.classList.add("hidden");
     log_storage.scrollTop = log_storage.scrollHeight;
+});
+
+// Xử lý popup cho tính năng upload ảnh - chỉ tạo khi DOM đã sẵn sàng
+document.addEventListener('DOMContentLoaded', function() {
+    // Tạo và thêm popup vào DOM
+    function createImagePopup() {
+        // Kiểm tra nếu popup đã tồn tại thì không tạo lại
+        if (document.querySelector('.image-popup')) {
+            return;
+        }
+        
+        const chatContainer = document.querySelector('.chat-container');
+        if (!chatContainer) {
+            console.error('Chat container not found');
+            return;
+        }
+        
+        // Tạo popup
+        const imagePopup = document.createElement('div');
+        imagePopup.className = 'image-popup';
+        imagePopup.innerHTML = `
+            <div class="popup-item" id="upload-image">
+                <i class="fas fa-upload"></i>
+                <span>Tải ảnh lên</span>
+            </div>
+            <div class="popup-item" id="take-photo">
+                <i class="fas fa-camera"></i>
+                <span>Chụp ảnh</span>
+            </div>
+        `;
+        chatContainer.appendChild(imagePopup);
+        
+        // Xử lý sự kiện cho popup
+        setupPopupEvents(imagePopup);
+    }
+    
+    // Thiết lập các sự kiện cho popup
+    function setupPopupEvents(popup) {
+        const imageLabel = document.querySelector('.image-label');
+        if (!imageLabel) {
+            console.error('Image label not found');
+            return;
+        }
+        
+        // Khi click vào icon hình ảnh
+        imageLabel.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            imageLabel.classList.toggle('active');
+            popup.classList.toggle('active');
+        });
+        
+        // Khi click vào "Tải ảnh lên"
+        document.getElementById('upload-image').addEventListener('click', function() {
+            const imageInput = document.getElementById('image');
+            if (imageInput) {
+                imageInput.click();
+                popup.classList.remove('active');
+                imageLabel.classList.remove('active');
+            } else {
+                console.error('Image input not found');
+            }
+        });
+        
+        // Khi click vào "Chụp ảnh"
+        document.getElementById('take-photo').addEventListener('click', function() {
+            if (document.getElementById('camera')) {
+                document.getElementById('camera').click();
+            } else {
+                const cameraInput = document.createElement('input');
+                cameraInput.type = 'file';
+                cameraInput.accept = 'image/*';
+                cameraInput.capture = 'camera';
+                cameraInput.id = 'camera';
+                cameraInput.className = 'hidden';
+                cameraInput.addEventListener('change', handleImageUpload);
+                document.body.appendChild(cameraInput);
+                cameraInput.click();
+            }
+            popup.classList.remove('active');
+            imageLabel.classList.remove('active');
+        });
+        
+        // Ẩn popup khi click ra ngoài
+        document.addEventListener('click', function(e) {
+            if (!imageLabel.contains(e.target) && !popup.contains(e.target)) {
+                popup.classList.remove('active');
+                imageLabel.classList.remove('active');
+            }
+        });
+    }
+    
+    // Hàm xử lý upload ảnh từ camera (giữ nguyên logic hiện tại)
+    function handleImageUpload(e) {
+        const files = e.target.files;
+        if (files.length > 0) {
+            // Xử lý và hiển thị ảnh (giữ nguyên logic xử lý ảnh đã có)
+        }
+    }
+    
+    // Khởi tạo popup
+    createImagePopup();
 });

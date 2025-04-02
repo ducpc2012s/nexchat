@@ -1,17 +1,15 @@
-version: '3'
+version: '3.8'
 
 services:
-  gpt4free:
-    image: hlohaus789/g4f:latest
-    shm_size: 2gb
-    build:
-      context: .
-      dockerfile: docker/Dockerfile
-    volumes:
-      - .:/app
+  nexchat:
+    build: .
+    container_name: nexchat
     ports:
-      - '8080:8080'
-      - '1337:8080'
-      - '7900:7900'
-    environment:
-      - OLLAMA_HOST=host.docker.internal
+      - "8080:8080"
+    restart: unless-stopped
+    volumes:
+      - nexchat_data:/app/data
+
+volumes:
+  nexchat_data:
+    driver: local
